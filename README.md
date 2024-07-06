@@ -61,73 +61,81 @@ void dump(Print& p);
 // database size
 size_t size();
 
-// экспортный размер БД (для writeTo)
+// database export size (for writeTo)
 size_t writeSize();
 
-// экспортировать БД в Stream (напр. файл)
+// export database to Stream (e.g. file)
 bool writeTo(Stream& stream);
 
-// экспортировать БД в буфер размера writeSize()
+// export database to buffer of size writeSize()
 bool writeTo(uint8_t* buffer);
 
-// импортировать БД из Stream (напр. файл)
+// import database from Stream (e.g. file)
 bool readFrom(Stream& stream, size_t len);
 
-// импортировать БД из буфера
+// import database from buffer
 bool readFrom(const uint8_t* buffer, size_t len);
 
-// создать запись. Если существует - перезаписать пустой с новым типом
+// create a record. If exists, overwrite with a blank value
 bool create(size_t hash, gdb::Type type, uint16_t reserve = 0);
 
-// полностью освободить память
+// clear memory
 void reset();
 
-// стереть все записи (не освобождает зарезервированное место)
+// clear all records (does not free up reserved space)
 void clear();
 
-// получить запись
+// get record by hash
 gdb::Entry get(size_t hash);
+
+// get record by key
 gdb::Entry get(const Text& key);
 
-// удалить запись
+// delete record by hash
 void remove(size_t hash);
+
+// delete record by key
 void remove(const Text& key);
 
-// БД содержит запись с именем
+// check if record exists by hash
 bool has(size_t hash);
+
+// check if record exists by key
 bool has(const Text& key);
 
-// записать данные. DATA - любой тип данных
+// set value for associated hash 
 bool set(size_t hash, DATA data);
+
+// set value for associated key name
 bool set(const Text& key hash, DATA data);
 
-// инициализировать данные (создать ячейку и записать, если её нет). DATA - любой тип данных
+// initialize record (creates a record if it does not exist)
 bool init(size_t hash, DATA data);
 bool init(const Text& key hash, DATA data);
 ```
 
 ### GyverDBFile
-Данный класс наследует GyverDB, но умеет самостоятельно записываться в файл на флешку ESP при любом изменении и по истечении таймаута
+This class is inherited from GyverDB and can also self-write to a file in flash ESP on change and on timeout
 ```cpp
 GyverDBFile(fs::FS* nfs = nullptr, const char* path = nullptr, uint32_t tout = 10000);
 
-// установить файловую систему и имя файла
+// set file system and file name
 void setFS(fs::FS* nfs, const char* path);
 
-// установить таймаут записи, мс (умолч. 10000)
+// set record timeout in ms (default 10000)
 void setTimeout(uint32_t tout = 10000);
 
-// прочитать данные
+// begin reading data
 bool begin();
 
-// обновить данные в файле сейчас
+// refresh file content
 bool update();
 
-// тикер, вызывать в loop. Сам обновит данные при изменении и выходе таймаута, вернёт true
+// heartbeat. Updates the data on change and/or on timeout ,can be used in a loop. Returns true
 bool tick();
 ```
 
-Для использования нужно запустить FS и вызывать тикер в loop. При любом изменении в БД она сама запишется в файл после выхода таймаута:
+To use, launch the file system (FS) and use tick() in a loop. All changes will be recorded to a file on timeout:
 ```cpp
 #include <LittleFS.h>
 #include <GyverDBFile.h>
@@ -149,7 +157,7 @@ void loop() {
 }
 ```
 
-### Типы записей
+### Data types
 ```cpp
 None
 Int
@@ -162,16 +170,16 @@ Bin
 ```
 
 ### Entry
-- Наследует класс `Text` для более удобного чтения строк
+- Inherited from the `Text` class for optimized record processing
 
 ```cpp
-// тип записи
+// data type
 gdb::Type type();
 
-// вывести данные в буфер размера size(). Не добавляет 0-терминатор, если это строка
+// output to buffer of size size(). Does not add a 0-terminator if it is a string
 void writeBytes(void* buf);
 
-// вывести в переменную
+// output to variable
 bool writeTo(T& dest);
 
 Value toText();
@@ -183,8 +191,8 @@ int64_t toInt64();
 double toFloat();
 ```
 
-### Использование
-#### Ключи
+### Usage
+#### Keys
 БД хранит ключи в виде хэш-кодов, для доступа к БД нужно использовать непосредственно хэш или обычную строку, библиотека сама посчитает хэш:
 ```cpp
 db["key1"] = 1234;      // строка
