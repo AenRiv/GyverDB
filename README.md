@@ -7,58 +7,58 @@
 [![Foo](https://img.shields.io/badge/ПОДПИСАТЬСЯ-НА%20ОБНОВЛЕНИЯ-brightgreen.svg?style=social&logo=telegram&color=blue)](https://t.me/GyverLibs)
 
 # GyverDB
-Простая база данных для Arduino:
-- Хранение данных в парах ключ-значение
-- Поддерживает все целочисленные типы, float, строки и бинарные данные
-- Быстрая автоматическая конвертация данных между разными типами
-- Быстрый доступ благодаря хэш ключам и бинарному поиску - в 10 раз быстрее библиотеки [Pairs](https://github.com/GyverLibs/Pairs)
-- Компактная реализация - 8 байт на одну ячейку
-- Встроенный механизм автоматической записи на флешку ESP8266/ESP32
+Simple database for Arduino:
+- Stores data in key-value pairs
+- Supports all real numbers, float, string, and binary
+- Dynamic recasting of data types
+- Quick access due to hash keys and binary search - 10 times faster than [Pairs](https://github.com/GyverLibs/Pairs) library
+- Efficient storage: 8 bytes per value
+- Built-in auto-write to flash ESP8266/ESP32
 
-### Совместимость
-Совместима со всеми Arduino платформами (используются Arduino-функции)
+### Compatibility
+Compatible with all Arduino platforms (using native Arduino functions)
 
-### Зависимости
+### Dependencies
 - [GTL](https://github.com/GyverLibs/GTL) v1.0.6+
 - [StringUtils](https://github.com/GyverLibs/StringUtils) v1.4.15+
 
-## Содержание
-- [Использование](#usage)
-- [Версии](#versions)
-- [Установка](#install)
-- [Баги и обратная связь](#feedback)
+## Table of Content
+- [Usage](#usage)
+- [Version](#versions)
+- [Installation](#install)
+- [Known Bugs and Feedback](#feedback)
 
 <a id="usage"></a>
 
-## Использование
-Настройки компиляции перед подключением библиотеки
+## Usage
+Optional feature restriction definitions
 ```cpp
-#define DB_NO_UPDATES  // убрать стек обновлений
-#define DB_NO_FLOAT    // убрать поддержку float
-#define DB_NO_INT64    // убрать поддержку int64
-#define DB_NO_CONVERT  // не конвертировать данные (принудительно менять тип записи, keepTypes не работает)
+#define DB_NO_UPDATES  // disable refresh
+#define DB_NO_FLOAT    // disable float support
+#define DB_NO_INT64    // disable long long int (int64) support
+#define DB_NO_CONVERT  // disable dynamic data recasting (in place of keepTypes)
 ```
 
 ### GyverDB
 ```cpp
-// конструктор
-// можно зарезервировать ячейки
+// constructor
+// reserve table space
 GyverDB(uint16_t reserve = 0);
 
 
-// не изменять тип записи (конвертировать данные если тип отличается) (умолч. true)
+// do not change data types (default true)
 void keepTypes(bool keep);
 
-// использовать стек обновлений (умолч. false)
+// enable updates (default false)
 void useUpdates(bool use);
 
-// было изменение данных. После срабатывания сбросится в false
+// data change flag. Resets to false after triggering
 bool changed();
 
-// вывести всё содержимое БД
+// display all database content
 void dump(Print& p);
 
-// полный вес БД
+// database size
 size_t size();
 
 // экспортный размер БД (для writeTo)
